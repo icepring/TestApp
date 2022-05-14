@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:gravity="center_vertical"
+        android:layout_height="wrap_content"
+        android:layout_weight="4">
+
+        <TextView
+            android:id="@+id/buysell"
+            android:layout_alignParentEnd="true"
+            android:layout_width="30dp"
+            android:textColor="@color/purple_200"
+            android:layout_height="30dp"
+            android:background="@drawable/circle"
+            android:gravity="center"
+            android:text="売" />
+
+        <TextView
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_centerHorizontal="true"
+            android:text="2378.3" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:scaleType="fitCenter"
+            android:src="@mipmap/arrow_rate_down" />
+
+
+        <TextView
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_below="@+id/buysell"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="233" />
+
+    </RelativeLayout>
+
+
+
+</LinearLayout>
