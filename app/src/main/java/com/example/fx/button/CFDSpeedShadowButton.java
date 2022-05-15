@@ -238,7 +238,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         mPaint.setTextSize(markR * 1.1f);
         drawTextInRect(canvas, text, mRectF, mPaint, TextAlign.CENTER);
 
-        //--------------------------draw up down 箭头--------------------------------------
+        //--------------------------计算注意内容区域--------------------------------------
         if (isBuy()) {
             mRectF.set(space + markX, markX, w - h / 7.0F, h - markX);
         } else {
@@ -253,19 +253,13 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
 
         float upperH;
         float left;
-        if ((double) priceRect.height() * 1.3D < (double) priceRect.width()) {
-            upperH = priceRect.height() * 1.3F;
-            left = priceRect.centerX();
-            priceRect.left = left - upperH / (float) 2;
-            priceRect.right = left + upperH / (float) 2;
-        }
 
         if (!Double.isNaN(price) && this.priceParts.getPrice() != 0.0D) {
 
             upperH = priceRect.height() * 2.0F / 5.0F;
             left = priceRect.width() * 4.0F / 5.0F;
             float U;
-
+            //--------------------------draw up down 箭头--------------------------------------
             if (this.indicator != TickIndicator.NEUTRAL) {
                 float size = mBuySellRect.width() * 2 / 3;
                 if (isBuy()) {
@@ -310,17 +304,21 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
 
             U = priceRect.bottom - upperH;
             mPaint.setTextSize(Math.min(left, U));
-            mRectF.set(priceRect.left, upperH + y0, priceRect.left + left, priceRect.bottom - upperH / 6);
+            if (isBuy()) {
+                mRectF.set(mUpDownRectF.right, upperH + y0, mBuySellRect.left, priceRect.bottom - upperH / 6);
+            } else {
+                mRectF.set(mBuySellRect.right, upperH + y0, mUpDownRectF.left, priceRect.bottom - upperH / 6);
+            }
             if (debug) {
                 canvas.drawRect(mRectF, mPaint);
             }
-            drawTextInRect(canvas, this.priceParts.getCenterPart(), mRectF, mPaint, TextAlign.BOTTOM);
-            //--------------------------draw RightPart--------------------------------------
+            float x = drawTextInRect(canvas, this.priceParts.getCenterPart(), mRectF, mPaint, TextAlign.BOTTOM);
 
-            mPaint.setTextSize(left * 0.5F);
-            mRectF.set(priceRect.left + left,
+            //--------------------------draw RightPart--------------------------------------
+            mPaint.setTextSize(mPaint.getTextSize() * 0.7F);
+            mRectF.set(x,
                     upperH + y0,
-                    priceRect.right + dpToPxFloat(5), priceRect.bottom - upperH / 6);
+                    x + left / 4, priceRect.bottom - upperH / 6);
             if (debug) {
                 canvas.drawRect(mRectF, mPaint);
             }
@@ -374,9 +372,11 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
      * @param paint  ペイント
      * @param align  整列
      */
-    private void drawTextInRect(Canvas canvas, String text, RectF rect, Paint paint, TextAlign align) {
-        float x, y;
+    private float drawTextInRect(Canvas canvas, String text, RectF rect, Paint paint, TextAlign align) {
+
+        float endX = 0;
         if (text.length() != 0) {
+            float x, y;
             float firstTextSize = paint.getTextSize();
             Rect bounds = new Rect();
             paint.getTextBounds(text, 0, text.length(), bounds);
@@ -422,7 +422,9 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             if (paint.getTextSize() != firstTextSize) {
                 paint.setTextSize(firstTextSize);
             }
+            endX = x + textWidth;
         }
+        return endX;
     }
 
     /**

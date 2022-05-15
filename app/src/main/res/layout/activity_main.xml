@@ -13,8 +13,8 @@
 
         <com.example.fx.button.CFDSpeedShadowButton
             android:id="@+id/speed_sell1"
-            android:layout_width="0dp"
-            android:layout_height="90dp"
+            android:layout_width="100dp"
+            android:layout_height="130dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:tag="sell" />
@@ -35,7 +35,7 @@
 
         </LinearLayout>
 
-        <com.example.fx.button.CFDSpeedButton
+        <com.example.fx.button.CFDSpeedShadowButton
             android:id="@+id/speed_buy1"
             android:layout_width="0dp"
             android:layout_height="90dp"
