@@ -34,9 +34,9 @@ import androidx.appcompat.widget.AppCompatTextView;
  * @Email Jliuer@aliyun.com  CFDSpeedShadowButton
  * @Description
  */
-public class CFDSpeedShadowButton extends AppCompatTextView {
+public class CFDSpeedShadowButtonBk extends AppCompatTextView {
 
-    private boolean debug = false;
+    private boolean debug = true;
 
     public static final String SELL = "sell";
     public static final String BUY = "buy";
@@ -65,6 +65,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
     private int buySellMarkBGColor;
     private int buySellMarkTextColor;
     private int priceColor;
+    private int decimalDigits;
     private int shadowColor;
     private boolean isShowShadow = true;
     private float shadowRadios;
@@ -73,22 +74,15 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
     private Bitmap shadowBitmap;
     private Path mCachePath;
 
-    public CFDSpeedShadowButton(Context context) {
+    public CFDSpeedShadowButtonBk(Context context) {
         this(context, null);
     }
 
-    public CFDSpeedShadowButton(Context context, AttributeSet attrs) {
+    public CFDSpeedShadowButtonBk(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    /**
-     * cfdspeedシャドウボタン
-     *
-     * @param context      コンテクスト
-     * @param attrs        attrs
-     * @param defStyleAttr defスタイル属性
-     */
-    public CFDSpeedShadowButton(Context context, AttributeSet attrs, int defStyleAttr) {
+    public CFDSpeedShadowButtonBk(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         mPaint.setAntiAlias(true);
         mPaint.setColor(Color.RED);
@@ -104,7 +98,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         bgColor = Color.YELLOW;
         shadowColor = Color.GREEN;
         buySellMarkBGColor = Color.BLUE;
-        priceColor = Color.RED;
+        priceColor = Color.BLUE;
         buySellMarkTextColor = Color.WHITE;
         price = Double.NaN;
         indicator = TickIndicator.UP;
@@ -149,7 +143,6 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
                 Region region = new Region();
                 region.setPath(mPath, new Region((int) rect.left, (int) rect.top, (int) rect.right, (int) rect.bottom));
                 boolean isInArea = region.contains((int) event.getX(), (int) event.getY());
-                invalidate();
                 if (isInArea && mClickListener != null) {
                     mClickListener.onClick(isBuy());
                 }
@@ -172,22 +165,12 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         }
     }
 
-    /**
-     * カスタムドロー
-     *
-     * @param canvas       キャンバス
-     * @param isDrawShadow 影を描く
-     */
     private void onCustomDraw(Canvas canvas, boolean isDrawShadow) {
         float w = getWidth();
         float h = getHeight();
 
         if (w * h == 0) {
             return;
-        }
-        if (debug) {
-            mPaint.setStyle(Style.STROKE);
-            mPaint.setStrokeWidth(5);
         }
         //------------------draw 梯形---------------------------------------------------------
         float radios = dpToPxFloat(10);
@@ -197,10 +180,8 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         // 角度
         float p = (float) Math.atan2(h, space);
         calculateShape(w, h, radios, space, x0, y0, p);
-        canvas.save();
         if (isDrawShadow) {
             canvas.drawPath(mCachePath, mPaint);
-            canvas.restore();
             return;
         }
         float scalcX = (w - shadowRadios) / w;
@@ -225,16 +206,18 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         mBuySellRect.set(mRectF);
 
         if (debug) {
+            mPaint.setStyle(Style.STROKE);
+            mPaint.setColor(Color.RED);
             canvas.drawRect(mBuySellRect, mPaint);
         }
 
         mPaint.setColor(buySellMarkBGColor);
         canvas.drawCircle(mRectF.centerX(), mRectF.centerY(), markR, mPaint);
 
-        mPaint.setColor(buySellMarkTextColor);
-        mPaint.setTextSize(markR * 1.1f);
-        drawTextInRect(canvas, text, mRectF, mPaint, TextAlign.CENTER);
-
+        getPaint().setColor(buySellMarkTextColor);
+        getPaint().setTextSize(markR * 1.1F);
+        drawTextInRect(canvas, text, mRectF, getPaint(), TextAlign.CENTER);
+        getPaint().setColor(priceColor);
         //--------------------------draw up down 箭头--------------------------------------
         if (isBuy()) {
             mRectF.set(space + markX, markX, w - h / 7.0F, h - markX);
@@ -289,8 +272,6 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             }
 
             //--------------------------draw LeftPart--------------------------------------
-            getPaint().setColor(priceColor);
-            getPaint().setTypeface(Typeface.DEFAULT_BOLD);
             getPaint().setTextSize(upperH * 0.6F);
             if (isBuy()) {
                 mRectF.set(mUpDownRectF.right, priceRect.top + y0, mBuySellRect.left, mBuySellRect.bottom);
@@ -300,16 +281,17 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
 
             drawTextInRect(canvas, this.priceParts.getLeftPart(), mRectF, getPaint(), TextAlign.BOTTOM);
             if (debug) {
-                canvas.drawRect(mRectF, getPaint());
+                canvas.drawRect(mRectF, mPaint);
             }
 
             //--------------------------draw CenterPart--------------------------------------
 
+            getPaint().setTypeface(Typeface.DEFAULT_BOLD);
             U = priceRect.bottom - upperH;
             getPaint().setTextSize(Math.min(left, U));
             mRectF.set(priceRect.left, upperH + y0, priceRect.left + left, priceRect.bottom - upperH / 6);
             if (debug) {
-                canvas.drawRect(mRectF, getPaint());
+                canvas.drawRect(mRectF, mPaint);
             }
             drawTextInRect(canvas, this.priceParts.getCenterPart(), mRectF, getPaint(), TextAlign.BOTTOM);
             //--------------------------draw RightPart--------------------------------------
@@ -319,27 +301,15 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
                     upperH + y0,
                     priceRect.right + dpToPxFloat(5), priceRect.bottom - upperH / 6);
             if (debug) {
-                canvas.drawRect(mRectF, getPaint());
+                canvas.drawRect(mRectF, mPaint);
             }
             drawTextInRect(canvas, this.priceParts.getRightPart(), mRectF, getPaint(), TextAlign.BOTTOM);
         }
-        canvas.restore();
     }
 
-    /**
-     * 形状を計算する
-     *
-     * @param w      w
-     * @param h      h
-     * @param radios ラジオ
-     * @param space  スペース
-     * @param x0     x0
-     * @param y0     y0
-     * @param p      p
-     */
     private void calculateShape(float w, float h, float radios, float space, float x0, float y0, float p) {
-        mPaint.setColor(bgColor);
         if (mCachePath == null) {
+            mPaint.setColor(bgColor);
             mCachePath = new Path();
             mPath.reset();
             mPath.moveTo(x0, y0);
@@ -362,15 +332,6 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         }
     }
 
-    /**
-     * rectでテキストを描く
-     *
-     * @param canvas キャンバス
-     * @param text   文章
-     * @param rect   rect
-     * @param paint  ペイント
-     * @param align  整列
-     */
     private void drawTextInRect(Canvas canvas, String text, RectF rect, Paint paint, TextAlign align) {
         float x, y;
         if (text.length() != 0) {
@@ -422,11 +383,6 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         }
     }
 
-    /**
-     * 設定価格
-     *
-     * @param value 価値
-     */
     private void setPrice(double value) {
         if (price == value) {
             return;
@@ -439,33 +395,18 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             }
         }
         price = value;
+        priceParts.setDecimalDigits(decimalDigits);
         priceParts.setPrice(value);
     }
 
-    /**
-     * クリックリスナーに設定
-     *
-     * @param clickListener クリックリスナー
-     */
     public void setOnClickListener(CFDSpeedButtonClickListener clickListener) {
         mClickListener = clickListener;
     }
 
-    /**
-     * 購入する
-     *
-     * @return boolean
-     */
     private boolean isBuy() {
         return BUY.equals(getTag());
     }
 
-    /**
-     * dpからpxfloat
-     *
-     * @param dp dp
-     * @return float
-     */
     private float dpToPxFloat(float dp) {
         final float scale = getResources().getDisplayMetrics().density;
         return dp * scale;
@@ -483,7 +424,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
     }
 
     enum TextAlign {
-        // 価格テキストの相対位置
+        // 文字对齐方式
         LEFT,
         TOP,
         RIGHT,
@@ -493,17 +434,33 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
 
     static final class PriceParts {
 
-        // 無効な値  Not-a-Number (NaN)
+        // 小数位数
+        private int decimalDigits;
+
+        // 无效数值  Not-a-Number (NaN)
         private double price = Double.NaN;
 
-        // 価格整数
+        // 整数
         private String leftPart = "";
 
-        // 価格中小数
+        // 中间小数
         private String centerPart = "";
 
-        // 価格右小数
+        // 右边小数
         private String rightPart = "";
+
+
+        public final int getDecimalDigits() {
+            return decimalDigits;
+        }
+
+        public final void setDecimalDigits(int value) {
+            decimalDigits = value;
+            if (Double.isNaN(price)) {
+                return;
+            }
+            setPrice(price);
+        }
 
         public final double getPrice() {
             return price;
@@ -516,8 +473,6 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
                 centerPart = "";
                 leftPart = "";
             } else {
-                // 小数位 3
-                int decimalDigits = 3;
                 String format = "%." + decimalDigits + 'f';
                 String s = String.format(Locale.JAPAN, format, value);
                 int len = s.length();
@@ -530,6 +485,11 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
                 centerPart = s.substring(len - 3, len - 1);
                 leftPart = s.substring(0, len - 3);
             }
+        }
+
+        public final boolean isNaN() {
+            double var1 = price;
+            return Double.isNaN(var1);
         }
 
         public final String getLeftPart() {
@@ -553,6 +513,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         private int bgColor;
         private int buySellMarkBGColor;
         private int buySellMarkTextColor;
+        private int decimalDigits;
         private int shadowColor;
         private float shadowRadios;
         private int priceColor;
@@ -565,6 +526,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             priceColor = builder.priceColor;
             shadowRadios = builder.shadowRadios;
             shadowColor = builder.shadowColor;
+            decimalDigits = builder.decimalDigits;
             buySellMarkTextColor = builder.buySellMarkTextColor;
             buySellMarkBGColor = builder.buySellMarkBGColor;
             isOrderLocked = builder.isOrderLocked;
@@ -602,6 +564,11 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             return this;
         }
 
+        public Builder buildDecimalDigits(int decimalDigits) {
+            this.decimalDigits = decimalDigits;
+            return this;
+        }
+
         public Builder buildShadowColor(int shadowColor) {
             this.shadowColor = shadowColor;
             return this;
@@ -611,7 +578,6 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             this.shadowRadios = shadowRadios;
             return this;
         }
-
 
         public Builder buildPriceColor(int priceColor) {
             this.priceColor = priceColor;
@@ -623,19 +589,19 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             return this;
         }
 
-        public void updateData(CFDSpeedShadowButton button) {
+        public void updateData(CFDSpeedShadowButtonBk button) {
             button.isShowShadow = isShowShadow;
             button.bgColor = bgColor;
             button.priceColor = priceColor;
             button.shadowRadios = shadowRadios;
             button.shadowColor = shadowColor;
+            button.decimalDigits = decimalDigits;
             button.buySellMarkTextColor = buySellMarkTextColor;
             button.buySellMarkBGColor = buySellMarkBGColor;
             button.isOrderLocked = isOrderLocked;
             button.indicator = indicator;
             button.setPrice(price);
             button.postInvalidate();
-            indicator = TickIndicator.NEUTRAL;
         }
     }
 

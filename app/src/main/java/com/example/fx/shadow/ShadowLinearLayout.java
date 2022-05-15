@@ -1,5 +1,6 @@
 package com.example.fx.shadow;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
@@ -44,6 +45,7 @@ public class ShadowLinearLayout extends LinearLayout implements IShadowLayout {
     @Override
     public void superdispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
+
     }
 
     @Override
@@ -58,12 +60,16 @@ public class ShadowLinearLayout extends LinearLayout implements IShadowLayout {
         mShadowViewEvent.onDetachedFromWindow();
     }
 
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        mShadowViewEvent.onDraw(canvas);
+        mShadowViewEvent.onDrawOver(canvas);
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        mShadowViewEvent.onDraw(canvas);
-        mShadowViewEvent.onDrawOver(canvas);
+
     }
 
     @Override

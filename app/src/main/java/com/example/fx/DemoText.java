@@ -12,32 +12,65 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatTextView;
 
 /**
+ * デモテキスト
  * Create by y.tang0 on 2022/05/11
  * Description: This is DemoText
+ *
+ * @author 小天
+ * @date 2022/05/15
  */
 public class DemoText extends AppCompatTextView {
 
+    /**
+     * 道
+     */
     private Path path;
 
 
+    /**
+     * デモテキスト
+     *
+     * @param context コンテクスト
+     */
     public DemoText(Context context) {
         super(context);
         path = new Path();
     }
 
+    /**
+     * デモテキスト
+     *
+     * @param context コンテクスト
+     * @param attrs   attrs
+     */
     public DemoText(Context context,  AttributeSet attrs) {
         super(context, attrs);
         path = new Path();
     }
 
+    /**
+     * デモテキスト
+     *
+     * @param context      コンテクスト
+     * @param attrs        attrs
+     * @param defStyleAttr defスタイル属性
+     */
     public DemoText(Context context,  AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         path = new Path();
     }
 
 
+    /**
+     * r
+     */
     int r = 40;
 
+    /**
+     * ドロー時
+     *
+     * @param canvas キャンバス
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -75,6 +108,17 @@ public class DemoText extends AppCompatTextView {
         System.out.println("C**"+C);
     }
 
+    /**
+     * lfetポイントを取得
+     *
+     * @param r      r
+     * @param tw     tw
+     * @param fr     fr
+     * @param w      w
+     * @param th     th
+     * @param canvas キャンバス
+     * @return {@link Path}
+     */
     Path getLfetPoint(float r,float tw ,float fr,float w,float th,Canvas canvas){
 
         path.reset();
@@ -100,6 +144,17 @@ public class DemoText extends AppCompatTextView {
         return path;
     }
 
+    /**
+     * 正しいポイントを取得
+     *
+     * @param r      r
+     * @param tw     tw
+     * @param fr     fr
+     * @param w      w
+     * @param th     th
+     * @param canvas キャンバス
+     * @return {@link Path}
+     */
     Path getRightPoint(float r,float tw ,float fr,float w,float th,Canvas canvas){
         // left top
         path.reset();
@@ -124,10 +179,23 @@ public class DemoText extends AppCompatTextView {
         return path;
     }
 
+    /**
+     * 度に
+     *
+     * @param start 始める
+     * @param pi2   pi2
+     * @return float
+     */
     private float toDeg(float start, float pi2) {
         return start / pi2 * 90f;
     }
 
+    /**
+     * dpからpxfloat
+     *
+     * @param dp dp
+     * @return float
+     */
     private float dpToPxFloat(int dp) {
         return getResources().getDisplayMetrics().density * dp;
     }

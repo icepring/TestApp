@@ -9,6 +9,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -26,7 +28,7 @@ import java.util.Locale;
  *
  * @Author Jliuer
  * @Date 2022/05/12
- * @Email Jliuer@aliyun.com
+ * @Email Jliuer@aliyun.com  CFDSpeedShadowButton
  * @Description
  */
 public class CFDSpeedButton extends AppCompatTextView {
@@ -44,6 +46,8 @@ public class CFDSpeedButton extends AppCompatTextView {
     private int buySellMarkTextColor;
     private int decimalDigits;
 
+    private boolean debug = true;
+
     public CFDSpeedButton(Context context) {
         this(context, null);
     }
@@ -57,7 +61,6 @@ public class CFDSpeedButton extends AppCompatTextView {
         mPaint.setAntiAlias(true);
         mPaint.setColor(Color.RED);
         mPaint.setStyle(Style.FILL);
-        mPaint.setStrokeWidth(5);
 
         setBackgroundColor(0);
 
@@ -96,53 +99,31 @@ public class CFDSpeedButton extends AppCompatTextView {
         mPath.reset();
         //------------------draw 梯形---------------------------------------------------------
         float radios = dpToPxFloat(10);
-        float pi = (float) Math.PI;
-        final float pi2 = pi / 2.0F;
         float space = dpToPxFloat(20);
-
-
         float x0 = 0;
-        float y0 = dpToPxFloat(5);
-
-        float topRightX = w - space;
-        float bottomRightX = w - radios;
+        float y0 = 0;
 
         // 角度
         float P = (float) Math.atan2(h, space);
 
-        // rightBottom
-        mPath.moveTo(bottomRightX, h);
-
-        // leftBottom
+        mPaint.setColor(bgColor);
+        mPath.reset();
+        mPath.moveTo(x0, y0);
+        mPath.lineTo(w - space - radios, y0);
+        float x = (float) Math.cos(P) * radios;
+        float y = (float) Math.sin(P) * radios;
+        mPath.quadTo(w - space, y0, w - space + x, y);
+        mPath.lineTo(w - x, h - y);
+        mPath.quadTo(w, h, w - radios, h);
         mPath.lineTo(radios, h);
         mPath.quadTo(x0, h, x0, h - radios);
-
-        // leftTop
-        mPath.lineTo(x0, y0 + radios);
+        mPath.lineTo(x0, radios);
         mPath.quadTo(x0, y0, radios, y0);
-
-        // rightTop
-        mPath.lineTo(topRightX - radios, y0);
-        float start = pi2 * 3.0F;
-        mRectF.set(topRightX - radios * 2, y0, topRightX, y0 + radios);
-        mPath.arcTo(mRectF, (float) Math.toDegrees(start), (float) Math.toDegrees(P));
-
-        // rightBottom
-        float radios2 = radios / 2;
-        float lx = bottomRightX + radios2 * (float) Math.cos(P);
-        float ly = h - radios2 * (float) Math.sin(P);
-        mPath.lineTo(lx, ly);
-        start = P / 2;
-        mRectF.set(lx - 2 * radios2, h - radios2 * 2, lx, h);
-        mPath.arcTo(mRectF, (float) Math.toDegrees(start), (float) Math.toDegrees(P));
-
-        mPath.close();
         if (isBuy()) {
             matrix.setScale(-1.0F, 1.0F);
             matrix.postTranslate(w, 0.0F);
             mPath.transform(matrix);
         }
-        mPaint.setColor(bgColor);
         canvas.drawPath(mPath, mPaint);
 
         //-----------------------draw 买卖标识-----------------------------------------
@@ -161,8 +142,11 @@ public class CFDSpeedButton extends AppCompatTextView {
         mBuySellRect.set(mRectF);
 
 
-        mPaint.setStyle(Style.STROKE);
-        canvas.drawRect(mBuySellRect,mPaint);
+        if (debug) {
+            mPaint.setStyle(Style.STROKE);
+            mPaint.setStrokeWidth(5);
+            canvas.drawRect(mBuySellRect, mPaint);
+        }
 
         mPaint.setColor(buySellMarkBGColor);
         canvas.drawCircle(mRectF.centerX(), mRectF.centerY(), markR, mPaint);
@@ -179,7 +163,11 @@ public class CFDSpeedButton extends AppCompatTextView {
         }
 
         rateRect.set(mRectF);
-        canvas.drawRect(rateRect,mPaint);
+
+        if (debug) {
+            canvas.drawRect(rateRect,mPaint);
+        }
+
         float upperH;
         float left;
         if ((double) rateRect.height() * 1.3D < (double) rateRect.width()) {
@@ -204,7 +192,9 @@ public class CFDSpeedButton extends AppCompatTextView {
                 } else {
                     mUpDownRectF.set(rateRect.right - SIZE, mBuySellRect.top, rateRect.right, mBuySellRect.top + SIZE);
                 }
-                canvas.drawRect(mUpDownRectF,mPaint);
+                if (debug) {
+                    canvas.drawRect(mUpDownRectF,mPaint);
+                }
                 Bitmap bitmap;
                 if (isOrderLocked()) {
                     bitmap = this.indicator == TickIndicator.UP ? this.upImageDisabled :
@@ -227,8 +217,9 @@ public class CFDSpeedButton extends AppCompatTextView {
             }
 
             drawTextInRect(canvas, this.priceParts.getLeftPart(), mRectF, mPaint, TextAlign.BOTTOM);
-            canvas.drawRect(mRectF,mPaint);
-
+            if (debug) {
+                canvas.drawRect(mRectF,mPaint);
+            }
 
             //--------------------------draw CenterPart--------------------------------------
 
@@ -236,8 +227,9 @@ public class CFDSpeedButton extends AppCompatTextView {
             U = rateRect.bottom - upperH;
             mPaint.setTextSize(Math.min(left, U));
             mRectF.set(rateRect.left, upperH + y0, rateRect.left + left, rateRect.bottom - upperH / 6);
-            canvas.drawRect(mRectF,mPaint);
-
+            if (debug) {
+                canvas.drawRect(mRectF,mPaint);
+            }
             drawTextInRect(canvas, this.priceParts.getCenterPart(), mRectF, mPaint, TextAlign.BOTTOM);
             //--------------------------draw RightPart--------------------------------------
 
@@ -245,8 +237,9 @@ public class CFDSpeedButton extends AppCompatTextView {
             mRectF.set(rateRect.left + left,
                     upperH + y0,
                     rateRect.right + dpToPxFloat(5), rateRect.bottom - upperH / 6);
-            canvas.drawRect(mRectF,mPaint);
-
+            if (debug) {
+                canvas.drawRect(mRectF,mPaint);
+            }
             drawTextInRect(canvas, this.priceParts.getRightPart(), mRectF, mPaint, TextAlign.BOTTOM);
         }
     }

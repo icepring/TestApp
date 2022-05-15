@@ -12,8 +12,6 @@ import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.Objects;
-
 import static android.view.View.LAYER_TYPE_HARDWARE;
 
 /**
@@ -43,7 +41,7 @@ public class Shadow implements IShadowViewEvent {
     public Shadow(ViewGroup parent) {
         mParent = parent;
         if (!(mParent instanceof IShadowLayout)) {
-//            throw new IllegalArgumentException("this is not ShadowLayout");
+            throw new IllegalArgumentException("this is not ShadowLayout");
         }
         this.mParent = parent;
         init();
@@ -51,13 +49,9 @@ public class Shadow implements IShadowViewEvent {
 
 
     protected void init() {
-        if (mParent != null) {
-
-
-            mParent.setLayerType(LAYER_TYPE_HARDWARE, mPaint);
-            mParent.setWillNotDraw(false);
-            mParent.setPadding(shadowRadius, shadowRadius, shadowRadius, shadowRadius);
-        }
+        mParent.setLayerType(LAYER_TYPE_HARDWARE, mPaint);
+        mParent.setWillNotDraw(false);
+        mParent.setPadding(shadowRadius, shadowRadius, shadowRadius, shadowRadius);
         mPaint.setMaskFilter(new BlurMaskFilter(shadowRadius, BlurMaskFilter.Blur.NORMAL));
         mClipPath = new Path();
     }
@@ -76,24 +70,19 @@ public class Shadow implements IShadowViewEvent {
             } else {
                 mBitmap = Bitmap.createBitmap(mBouds.width(), mBouds.height(), Bitmap.Config.ARGB_8888);
                 mCanvas.setBitmap(mBitmap);
-//                ((IShadowLayout) mParent).superdispatchDraw(mCanvas);
-
-
+                ((IShadowLayout) mParent).superdispatchDraw(mCanvas);
                 Bitmap alphaBitmap = mBitmap.extractAlpha();
                 mCanvas.drawColor(0, PorterDuff.Mode.CLEAR);
-
                 mPaint.setColor(shadowColor);
-
                 mCanvas.drawBitmap(alphaBitmap, 0f, 0f, mPaint);
-
-
                 alphaBitmap.recycle();
             }
             if (mBitmap != null && !mBitmap.isRecycled()) {
+                mPaint.setMaskFilter(null);
                 canvas.drawBitmap(mBitmap, 0f, 0f, mPaint);
             }
-//            ((IShadowLayout) mParent).superdispatchDraw(mCanvas);
         }
+        ((IShadowLayout) mParent).superdispatchDraw(isShowShadow ? mCanvas : canvas);
     }
 
     @Override
@@ -116,6 +105,7 @@ public class Shadow implements IShadowViewEvent {
         if (mClipPath != null && !mClipPath.isEmpty()) {
             canvas.clipPath(mClipPath);
         }
+
         return false;
     }
 
