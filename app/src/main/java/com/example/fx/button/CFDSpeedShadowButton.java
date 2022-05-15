@@ -36,7 +36,7 @@ import androidx.appcompat.widget.AppCompatTextView;
  */
 public class CFDSpeedShadowButton extends AppCompatTextView {
 
-    private boolean debug = false;
+    private boolean debug = true;
 
     public static final String SELL = "sell";
     public static final String BUY = "buy";
@@ -121,6 +121,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             if (shadowBitmap == null) {
                 shadowBitmap = Bitmap.createBitmap(getWidth(), getHeight(), Bitmap.Config.ARGB_8888);
             }
+            shadowBitmap.eraseColor(Color.TRANSPARENT);
             mCanvas.setBitmap(shadowBitmap);
             onCustomDraw(mCanvas, true);
             Bitmap alphaBitmap = shadowBitmap.extractAlpha();
@@ -128,7 +129,9 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             mCanvas.drawBitmap(alphaBitmap, 0f, 0f, shadowPaint);
             alphaBitmap.recycle();
             if (shadowBitmap != null && !shadowBitmap.isRecycled()) {
+                canvas.save();
                 canvas.drawBitmap(shadowBitmap, 0f, 0f, shadowPaint);
+                canvas.restore();
             }
         }
         onCustomDraw(canvas, false);
@@ -289,39 +292,39 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             }
 
             //--------------------------draw LeftPart--------------------------------------
-            getPaint().setColor(priceColor);
-            getPaint().setTypeface(Typeface.DEFAULT_BOLD);
-            getPaint().setTextSize(upperH * 0.6F);
+            mPaint.setColor(priceColor);
+            mPaint.setTypeface(Typeface.DEFAULT_BOLD);
+            mPaint.setTextSize(upperH * 0.6F);
             if (isBuy()) {
                 mRectF.set(mUpDownRectF.right, priceRect.top + y0, mBuySellRect.left, mBuySellRect.bottom);
             } else {
                 mRectF.set(mBuySellRect.right, priceRect.top + y0, mUpDownRectF.left, mBuySellRect.bottom);
             }
 
-            drawTextInRect(canvas, this.priceParts.getLeftPart(), mRectF, getPaint(), TextAlign.BOTTOM);
+            drawTextInRect(canvas, this.priceParts.getLeftPart(), mRectF, mPaint, TextAlign.BOTTOM);
             if (debug) {
-                canvas.drawRect(mRectF, getPaint());
+                canvas.drawRect(mRectF, mPaint);
             }
 
             //--------------------------draw CenterPart--------------------------------------
 
             U = priceRect.bottom - upperH;
-            getPaint().setTextSize(Math.min(left, U));
+            mPaint.setTextSize(Math.min(left, U));
             mRectF.set(priceRect.left, upperH + y0, priceRect.left + left, priceRect.bottom - upperH / 6);
             if (debug) {
-                canvas.drawRect(mRectF, getPaint());
+                canvas.drawRect(mRectF, mPaint);
             }
-            drawTextInRect(canvas, this.priceParts.getCenterPart(), mRectF, getPaint(), TextAlign.BOTTOM);
+            drawTextInRect(canvas, this.priceParts.getCenterPart(), mRectF, mPaint, TextAlign.BOTTOM);
             //--------------------------draw RightPart--------------------------------------
 
-            getPaint().setTextSize(left * 0.5F);
+            mPaint.setTextSize(left * 0.5F);
             mRectF.set(priceRect.left + left,
                     upperH + y0,
                     priceRect.right + dpToPxFloat(5), priceRect.bottom - upperH / 6);
             if (debug) {
-                canvas.drawRect(mRectF, getPaint());
+                canvas.drawRect(mRectF, mPaint);
             }
-            drawTextInRect(canvas, this.priceParts.getRightPart(), mRectF, getPaint(), TextAlign.BOTTOM);
+            drawTextInRect(canvas, this.priceParts.getRightPart(), mRectF, mPaint, TextAlign.BOTTOM);
         }
         canvas.restore();
     }
