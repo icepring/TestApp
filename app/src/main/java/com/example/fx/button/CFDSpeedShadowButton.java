@@ -1,4 +1,4 @@
-package com.example.fx.button;
+package jp.co.rakuten_sec.ispeed.view.cfd.shadow;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -26,13 +26,8 @@ import java.util.Locale;
 import androidx.appcompat.widget.AppCompatTextView;
 
 /**
- * ThinkSNS Plus
- * Copyright (c) 2022 Chengdu ZhiYiChuangXiang Technology Co., Ltd.
- *
- * @Author Jliuer
- * @Date 2022/05/12
- * @Email Jliuer@aliyun.com  CFDSpeedShadowButton
- * @Description
+ * Create by y.tang0 on 2022/05/13
+ * Description:
  */
 public class CFDSpeedShadowButton extends AppCompatTextView {
 
