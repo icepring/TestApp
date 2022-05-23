@@ -1,4 +1,4 @@
-package jp.co.rakuten_sec.ispeed.view.cfd.shadow;
+package jp.co.rakuten_sec.ispeed.view.cfd;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -19,11 +19,11 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.example.fx.R;
-
 import java.util.Locale;
 
 import androidx.appcompat.widget.AppCompatTextView;
+
+import jp.co.rakuten_sec.ispeed.R;
 
 /**
  * Create by y.tang0 on 2022/05/13
@@ -31,7 +31,7 @@ import androidx.appcompat.widget.AppCompatTextView;
  */
 public class CFDSpeedShadowButton extends AppCompatTextView {
 
-    private boolean debug = true;
+    private boolean debug = false;
 
     public static final String SELL = "sell";
     public static final String BUY = "buy";
@@ -62,7 +62,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
     private int priceColor;
     private int shadowColor;
     private boolean isShowShadow = true;
-    private float shadowRadios;
+    private float shadowRadios = 15f;
     private CFDSpeedButtonClickListener mClickListener;
 
     private Bitmap shadowBitmap;
@@ -88,13 +88,14 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         mPaint.setAntiAlias(true);
         mPaint.setColor(Color.RED);
         mPaint.setStyle(Style.FILL);
-
+        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        priceParts = new PriceParts();
         setBackgroundColor(0);
 
-        upImage = BitmapFactory.decodeResource(getResources(), R.mipmap.arrow_rate_up);
-        upImageDisabled = BitmapFactory.decodeResource(getResources(), R.mipmap.arrow_rate_up_desable);
-        downImage = BitmapFactory.decodeResource(getResources(), R.mipmap.arrow_rate_down);
-        downImageDisabled = BitmapFactory.decodeResource(getResources(), R.mipmap.arrow_rate_up_desable);
+        upImage = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_rate_up);
+        upImageDisabled = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_rate_up_desable);
+        downImage = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_rate_down);
+        downImageDisabled = BitmapFactory.decodeResource(getResources(), R.drawable.arrow_rate_up_desable);
 
         bgColor = Color.YELLOW;
         shadowColor = Color.GREEN;
@@ -103,11 +104,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         buySellMarkTextColor = Color.WHITE;
         price = Double.NaN;
         indicator = TickIndicator.UP;
-        priceParts = new PriceParts();
-        setLayerType(View.LAYER_TYPE_SOFTWARE, null);
-        shadowRadios = Math.max(20, shadowRadios);
-        shadowPaint.setMaskFilter(new BlurMaskFilter(shadowRadios, BlurMaskFilter.Blur.NORMAL));
-        shadowPaint.setColor(shadowColor);
+        configShaowAttributes();
     }
 
     @Override
@@ -188,8 +185,8 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             mPaint.setStrokeWidth(5);
         }
         //------------------draw 梯形---------------------------------------------------------
-        float radios = dpToPxFloat(10);
         float space = dpToPxFloat(20);
+        float radios = dpToPxFloat(10);
         float x0 = 0;
         float y0 = 0;
         // 角度
@@ -233,7 +230,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         mPaint.setTextSize(markR * 1.1f);
         drawTextInRect(canvas, text, mRectF, mPaint, TextAlign.CENTER);
 
-        //--------------------------计算注意内容区域--------------------------------------
+        //--------------------------计算主要内容区域--------------------------------------
         if (isBuy()) {
             mRectF.set(space + markX, markX, w - h / 7.0F, h - markX);
         } else {
@@ -311,6 +308,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
 
             //--------------------------draw RightPart--------------------------------------
             mPaint.setTextSize(mPaint.getTextSize() * 0.7F);
+            x += 5;
             mRectF.set(x,
                     upperH + y0,
                     x + left / 4, priceRect.bottom - upperH / 6);
@@ -335,27 +333,25 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
      */
     private void calculateShape(float w, float h, float radios, float space, float x0, float y0, float p) {
         mPaint.setColor(bgColor);
-        if (mCachePath == null) {
-            mCachePath = new Path();
-            mPath.reset();
-            mPath.moveTo(x0, y0);
-            mPath.lineTo(w - space - radios, y0);
-            float x = (float) Math.cos(p) * radios;
-            float y = (float) Math.sin(p) * radios;
-            mPath.quadTo(w - space, y0, w - space + x, y);
-            mPath.lineTo(w - x, h - y);
-            mPath.quadTo(w, h, w - radios, h);
-            mPath.lineTo(radios, h);
-            mPath.quadTo(x0, h, x0, h - radios);
-            mPath.lineTo(x0, radios);
-            mPath.quadTo(x0, y0, radios, y0);
-            if (isBuy()) {
-                matrix.setScale(-1.0F, 1.0F);
-                matrix.postTranslate(w, 0.0F);
-                mPath.transform(matrix);
-            }
-            mCachePath.set(mPath);
+        mCachePath = new Path();
+        mPath.reset();
+        mPath.moveTo(x0, y0);
+        mPath.lineTo(w - space - radios, y0);
+        float x = (float) Math.cos(p) * radios;
+        float y = (float) Math.sin(p) * radios;
+        mPath.quadTo(w - space, y0, w - space + x, y);
+        mPath.lineTo(w - x, h - y);
+        mPath.quadTo(w, h, w - radios, h);
+        mPath.lineTo(radios, h);
+        mPath.quadTo(x0, h, x0, h - radios);
+        mPath.lineTo(x0, radios);
+        mPath.quadTo(x0, y0, radios, y0);
+        if (isBuy()) {
+            matrix.setScale(-1.0F, 1.0F);
+            matrix.postTranslate(w, 0.0F);
+            mPath.transform(matrix);
         }
+        mCachePath.set(mPath);
     }
 
     /**
@@ -440,6 +436,15 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
         }
         price = value;
         priceParts.setPrice(value);
+    }
+
+    private void configShaowAttributes() {
+        shadowRadios = Math.max(shadowRadios, 15);
+        if (shadowRadios > dpToPxFloat(10)) {
+            shadowRadios = dpToPxFloat(10);
+        }
+        shadowPaint.setMaskFilter(new BlurMaskFilter(shadowRadios / 2, BlurMaskFilter.Blur.NORMAL));
+        shadowPaint.setColor(shadowColor);
     }
 
     /**
@@ -572,52 +577,112 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             price = builder.price;
         }
 
+
+        /**
+         * 価格を設定する
+         *
+         * @param price
+         * @return
+         */
         public Builder buildPrice(double price) {
             this.price = price;
             return this;
         }
 
+        /**
+         * 価格変更状態を設定する
+         *
+         * @param indicator 　up: 上昇 down: 下落 neutral: 変化なし
+         * @return
+         */
         public Builder buildIndicator(TickIndicator indicator) {
             this.indicator = indicator;
             return this;
         }
 
+        /**
+         * 注文ボタンロークを設定する
+         *
+         * @param orderLocked
+         * @return
+         */
         public Builder buildOrderLocked(boolean orderLocked) {
             isOrderLocked = orderLocked;
             return this;
         }
 
+        /**
+         * 注文ボタンカーラーを設定する
+         *
+         * @param bgColor
+         * @return
+         */
         public Builder buildBgColor(int bgColor) {
             this.bgColor = bgColor;
             return this;
         }
 
+        /**
+         * 注文ボタン　売買フラグ　バックグラウンドカーラーを設定する
+         *
+         * @param buySellMarkBGColor
+         * @return
+         */
         public Builder buildBuySellMarkBGColor(int buySellMarkBGColor) {
             this.buySellMarkBGColor = buySellMarkBGColor;
             return this;
         }
 
+        /**
+         * 注文ボタン　売買フラグ　文言カーラーを設定する
+         *
+         * @param buySellMarkTextColor
+         * @return
+         */
         public Builder buildBuySellMarkTextColor(int buySellMarkTextColor) {
             this.buySellMarkTextColor = buySellMarkTextColor;
             return this;
         }
 
+        /**
+         * 注文ボタン　オーラカーラーを設定する
+         *
+         * @param shadowColor
+         * @return
+         */
         public Builder buildShadowColor(int shadowColor) {
             this.shadowColor = shadowColor;
             return this;
         }
 
+        /**
+         * 注文ボタン　オーラ範囲を設定する
+         *
+         * @param shadowRadios
+         * @return
+         */
         public Builder buildShadowRadios(float shadowRadios) {
             this.shadowRadios = shadowRadios;
             return this;
         }
 
-
+        /**
+         * 注文ボタン　価格カーラーを設定する
+         *
+         * @param priceColor
+         * @return
+         */
         public Builder buildPriceColor(int priceColor) {
             this.priceColor = priceColor;
             return this;
         }
 
+        /**
+         * 注文ボタン　シャドーを設定する
+         *
+         * @param showShadow
+         * @return
+         */
         public Builder buildShowShadow(boolean showShadow) {
             isShowShadow = showShadow;
             return this;
@@ -634,6 +699,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
             button.isOrderLocked = isOrderLocked;
             button.indicator = indicator;
             button.setPrice(price);
+            button.configShaowAttributes();
             button.postInvalidate();
             indicator = TickIndicator.NEUTRAL;
         }
