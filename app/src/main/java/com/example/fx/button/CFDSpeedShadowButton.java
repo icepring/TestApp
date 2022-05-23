@@ -308,7 +308,7 @@ public class CFDSpeedShadowButton extends AppCompatTextView {
 
             //--------------------------draw RightPart--------------------------------------
             mPaint.setTextSize(mPaint.getTextSize() * 0.7F);
-            x += 5;
+            x += left / 8;
             mRectF.set(x,
                     upperH + y0,
                     x + left / 4, priceRect.bottom - upperH / 6);
